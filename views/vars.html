@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Debug dump{% endblock %}
+{% block content %}
+<table>
+{% for k,v in vars.items() %}
+<tr><td>{{k}}</td><td>{{v}}</td></tr>
+{% endfor %}
+</table>
+{% endblock %}
+

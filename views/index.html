@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}SEAS Cloud Account Manager{% endblock %}
+
+{% block content %}
+<ul>
+  <li><a href="{{ environ.SCRIPT_NAME}}/auth/create">Create</a> a new Cloud account.</li>
+  <li><a href="{{ environ.SCRIPT_NAME}}/auth/newkey">Regenerate</a> your Cloud API key.</li>
+  <li>Display <a href="{{ environ.SCRIPT_NAME }}/auth/info">information about an existing account</a></li>
+{% endblock %}
+

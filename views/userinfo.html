@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Information for {{ user.name }}{% endblock %}
+{% block content %}
+    <table id="userinfo">
+      <tr><td class="label">Name</td><td>{{user.name}}</td></tr>
+      <tr><td class="label">UUID</td><td>{{user.id}}</td></tr>
+      <tr><td class="label">Email</td><td>{{user.email}}</td></tr>
+      <tr><td class="label">Primary tenant</td><td>{{tenant.name}}</td></tr>
+
+      {% if apikey %}
+      <tr><td class="label">api key</td><td>{{apikey}}</td></tr>
+      {% endif %}
+    </table>
+
+    <p>Use your username and API key to log into the 
+    <a href="http://cloud.seas.harvard.edu/">SEAS Cloud</a> web interface.  View the <a href="https://cloud.seas.harvard.edu/settings/">user settings</a> page to download credentials for use with command line tools.</p>
+
+    <p><a href="{{ environ.SCRIPT_NAME }}/auth/newkey">Generate a new API key</a></p>
+{% endblock %}
+
