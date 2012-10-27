@@ -16,11 +16,18 @@ Here are the details for your [SEAS Cloud][] account:
   {% endif %}
 </table>
 
-Use your username and api key {% if not apikey %}(not shown){% endif %} to connect to the
-[SEAS Cloud][] web interface.  {% if not apikey %}If you have lost or
-forgotten your API key, you may [generate a new API key][apikey].{% else %}Your API key is shown above.{% endif %}
+{% if apikey %}
+Use your username and API key ({{apikey}}) to connect to the [SEAS Cloud][] web
+interface.
+{% else %}
+Use your username and API key (not shown) to connect to the [SEAS Cloud][] web
+interface.
 
-[apikey]: {{ environ.SCRIPT_NAME }}/auth/newkey
+If you have lost your API key you may generate a new one:
+
+<a href="{{ environ.SCRIPT_NAME }}/auth/newkey"><button>Generate new API key</button></a>
+{% endif %}
+
 {% endfilter %}
 {% endblock %}
 
