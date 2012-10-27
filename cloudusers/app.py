@@ -45,6 +45,10 @@ def index(message=None):
             )
 
 def authenticated(fn):
+    '''A function decorator for functions that require an authenticated
+    user.  Ensures that `REMOTE_USER` (and other criticals variables) are
+    available in the environment and set up a keystone client.'''
+
     def _(*args, **kwargs):
         for var in ['SERVICE_ENDPOINT', 'SERVICE_TOKEN', 'REMOTE_USER']:
             if var not in request.environ:
@@ -109,14 +113,17 @@ def create():
 
     print >>sys.stderr, 'userrec:', userrec
 
-    # if the user already exists, just update their password.
+    # If the user already exists, just display account information.
     if userrec:
         return info(
-                message='Found an existing SEAS Cloud account for your username (%s).' % userrec.name,
+                message='Found an existing SEAS Cloud account for ' \
+                        'your username (%s).' % userrec.name,
                 )
 
     # If we get this far we need to create the user.  First
-    # see if the appropriate tenant already exists.
+    # see if the appropriate tenant already exists (which might
+    # happen if someone deletes the user via the gui and leaves the tenant
+    # in place).
     try:
         tenantrec = request.client.tenants.find(name='user/%s' % uid)
     except NotFound:
@@ -127,6 +134,7 @@ def create():
 
     # And now we need to create some default
     # security rules.
+    # XXX: This should be cleaned up.
     nc = nova.Client(userrec.name, apikey, tenantrec.name,
             request.environ['SERVICE_ENDPOINT'],
             service_type='compute')
