@@ -5,7 +5,7 @@ import sys
 import string
 import random
 
-from bottle import route,post,request,static_file
+from bottle import route,post,request,response,static_file
 from bottle import jinja2_template as template
 
 import novaclient.v1_1.client as nova
@@ -26,6 +26,7 @@ def render(view, **kwargs):
 
 @route('/style.css')
 def style_css():
+    response.set_header('Content-type', 'text/css')
     return render('style.css')
 
 @route('/static/<path:path>')
