@@ -2,10 +2,16 @@
 
 import sys
 import os
+import site
+
+appdir = os.path.dirname(__file__)
+if os.path.exists(os.path.join(appdir, 'env')):
+    site.addsitedir(os.path.join(appdir, 'env'))
+sys.path.append(appdir)
+
 import bottle
 
-sys.path.append(os.path.dirname(__file__))
-os.chdir(os.path.dirname(__file__))
+os.chdir(appdir)
 import cloudusers.app
 application = bottle.default_app()
 
