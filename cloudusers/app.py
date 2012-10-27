@@ -24,6 +24,10 @@ def render(view, **kwargs):
                 { 'markdown': filter_markdown }},
             **kwargs)
 
+@route('/style.css')
+def style_css():
+    return render('style.css')
+
 @route('/static/<path:path>')
 def static(path):
     return static_file(path, 
