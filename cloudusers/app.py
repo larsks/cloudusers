@@ -20,6 +20,8 @@ def filter_markdown(s):
     return markdown.markdown(s)
 
 def render(view, **kwargs):
+    '''This wraps template rendering so that we can provide
+    a standard set of variables into the templates.'''
     return template(view,
             environ=request.environ,
             template_settings={ 'filters':
@@ -28,12 +30,14 @@ def render(view, **kwargs):
 
 @route('/style.css')
 def style_css():
+    '''Serves up our stylesheet.  This can't be a static file because we
+    need to do template subsitution on URL paths.'''
     response.set_header('Content-type', 'text/css')
     return render('style.css')
 
 @route('/static/<path:path>')
 def static(path):
-    '''Server up static files from the `static/` directory.'''
+    '''Serve up static files from the `static/` directory.'''
     return static_file(path, 
             root=os.path.join(os.path.dirname(__file__), '..', 'static'))
 
