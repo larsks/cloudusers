@@ -2,9 +2,29 @@
 {% block title %}SEAS Cloud Account Manager{% endblock %}
 
 {% block content %}
-<ul>
-  <li><a href="{{ environ.SCRIPT_NAME}}/auth/create">Create</a> a new Cloud account.</li>
-  <li><a href="{{ environ.SCRIPT_NAME}}/auth/newkey">Regenerate</a> your Cloud API key.</li>
-  <li>Display <a href="{{ environ.SCRIPT_NAME }}/auth/info">information about an existing account</a></li>
+{% filter markdown %}
+This web application will let you create and manage your SEAS Cloud
+account.  The [SEAS Cloud][] is our prototype implementation of
+[OpenStack][], a cloud controller similar in many ways to Amazon's
+Elastic Compute (EC2) service.
+
+After selecting one of the buttons below, enter your SEAS username and
+password when prompted.
+
+[openstack]: http://www.openstack.org/
+[seas cloud]: http://cloud.seas.harvard.edu/
+{% endfilter %}
+
+<div class="left">
+  <h2>Create my account</h2>
+
+  <a href="{{ environ.SCRIPT_NAME }}/auth/create"><button>Create my SEAS Cloud Account</button></a>
+</div>
+
+<div class="right">
+  <h2>Manage my account</h2>
+
+  <a href="{{ environ.SCRIPT_NAME }}/auth/info"><button>Manage my SEAS Cloud Account</button></a>
+</div>
 {% endblock %}
 

@@ -7,25 +7,22 @@
 	xml:lang="en">
 	<head>            
     <title>{% block title %}Title{% endblock %}</title>
-    <style>
-      .label {
-        font-weight: bold;
-      }
 
-      table#userinfo {
-        font-family: monospace;
-      }
-    </style>
+    <link rel="stylesheet" href="{{ environ.SCRIPT_NAME }}/static/style.css"/>
 	</head>
 	<body>
-    <h1>{{ self.title() }}</h1>
+
+    <div id="header">
+      <h1>{{ self.title() }}</h1>
+    </div>
 
     {% if message %}
     <div id="message">{{ message }}</div>
     {% endif %}
+
     <div id="content">
       {% block content %}Place content here.{% endblock %}
     </div>
-	</body>
+  </body>
 </html>
 

@@ -1,20 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Information for {{ user.name }}{% endblock %}
 {% block content %}
-    <table id="userinfo">
-      <tr><td class="label">Name</td><td>{{user.name}}</td></tr>
-      <tr><td class="label">UUID</td><td>{{user.id}}</td></tr>
-      <tr><td class="label">Email</td><td>{{user.email}}</td></tr>
-      <tr><td class="label">Primary tenant</td><td>{{tenant.name}}</td></tr>
+{% filter markdown %}
+Here are the details for your [SEAS Cloud][] account:
 
-      {% if apikey %}
-      <tr><td class="label">api key</td><td>{{apikey}}</td></tr>
-      {% endif %}
-    </table>
+[seas cloud]: http://cloud.seas.harvard.edu/
 
-    <p>Use your username and API key to log into the 
-    <a href="http://cloud.seas.harvard.edu/">SEAS Cloud</a> web interface.  View the <a href="https://cloud.seas.harvard.edu/settings/">user settings</a> page to download credentials for use with command line tools.</p>
+<table id="userinfo">
+  <tr><td class="label">Name</td><td>{{user.name}}</td></tr>
+  <tr><td class="label">Email</td><td>{{user.email}}</td></tr>
+  <tr><td class="label">Primary tenant</td><td>{{tenant.name}}</td></tr>
 
-    <p><a href="{{ environ.SCRIPT_NAME }}/auth/newkey">Generate a new API key</a></p>
+  {% if apikey %}
+  <tr><td class="label">api key</td><td>{{apikey}}</td></tr>
+  {% endif %}
+</table>
+
+Use your username and api key {% if not apikey %}(not shown){% endif %} to connect to the
+[SEAS Cloud][] web interface.  {% if not apikey %}If you have lost or
+forgotten your API key, you may [generate a new API key][apikey].{% else %}Your API key is shown above.{% endif %}
+
+[apikey]: {{ environ.SCRIPT_NAME }}/auth/newkey
+{% endfilter %}
 {% endblock %}
 

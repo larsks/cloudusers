@@ -161,7 +161,7 @@ def create():
 
 def main():
     opts = parse_args()
-    run(host=opts.host, port=int(opts.port))
+    run(host=opts.host, port=int(opts.port), reloader=True)
 
 if __name__ == '__main__':
     main()
