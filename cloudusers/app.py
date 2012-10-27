@@ -27,7 +27,7 @@ def render(view, **kwargs):
 @route('/static/<path:path>')
 def static(path):
     return static_file(path, 
-            root=os.path.join(os.path.dirname(__file__), 'static'))
+            root=os.path.join(os.path.dirname(__file__), '..', 'static'))
 
 @route('/auth/debug')
 def debug():
