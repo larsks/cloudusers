@@ -2,11 +2,10 @@
 
 import os
 import sys
-import argparse
 import string
 import random
 
-from bottle import route,post,run,request,static_file
+from bottle import route,post,request,static_file
 from bottle import jinja2_template as template
 
 import novaclient.v1_1.client as nova
@@ -17,12 +16,6 @@ import markdown
 
 def filter_markdown(s):
     return markdown.markdown(s)
-
-def parse_args():
-    p = argparse.ArgumentParser()
-    p.add_argument('--host', '-H', default='localhost')
-    p.add_argument('--port', '-p', default='8080')
-    return p.parse_args()
 
 def render(view, **kwargs):
     return template(view,
@@ -36,7 +29,7 @@ def static(path):
     return static_file(path, 
             root=os.path.join(os.path.dirname(__file__), 'static'))
 
-@route('/debug')
+@route('/auth/debug')
 def debug():
     return render('vars.html')
 
@@ -46,17 +39,24 @@ def index(message=None):
             message=message,
             )
 
-@route('/auth/info')
-def info(message=None):
-    if 'REMOTE_USER' not in request.environ:
-        return render('error.html',
-                message='Not authenticated.',
+def authenticated(fn):
+    def _(*args, **kwargs):
+        for var in ['SERVICE_ENDPOINT', 'SERVICE_TOKEN', 'REMOTE_USER']:
+            if var not in request.environ:
+                return render(error.html, message='Configuration error.')
+
+        request.client = keystone.Client(
+                endpoint=request.environ['SERVICE_ENDPOINT'],
+                token=request.environ['SERVICE_TOKEN'],
                 )
 
-    request.client = keystone.Client(
-            endpoint=request.environ['SERVICE_ENDPOINT'],
-            token=request.environ['SERVICE_TOKEN'],
-            )
+        return fn(*args, **kwargs)
+
+    return _
+
+@route('/auth/info')
+@authenticated
+def info(message=None):
     uid = request.environ['REMOTE_USER']
 
     try:
@@ -71,16 +71,8 @@ def info(message=None):
         return index(message='You do not have a SEAS cloud account.')
 
 @route('/auth/newkey')
+@authenticated
 def newkey():
-    if 'REMOTE_USER' not in request.environ:
-        return render('error.html',
-                message='Not authenticated.',
-                )
-
-    request.client = keystone.Client(
-            endpoint=request.environ['SERVICE_ENDPOINT'],
-            token=request.environ['SERVICE_TOKEN'],
-            )
     uid = request.environ['REMOTE_USER']
     apikey = ''.join(random.sample(string.letters + string.digits,
             20))
@@ -98,16 +90,8 @@ def newkey():
             )
 
 @route('/auth/create')
+@authenticated
 def create():
-    if 'REMOTE_USER' not in request.environ:
-        return render('error.html',
-                message='Not authenticated.',
-                )
-
-    request.client = keystone.Client(
-            endpoint=request.environ['SERVICE_ENDPOINT'],
-            token=request.environ['SERVICE_TOKEN'],
-            )
     uid = request.environ['REMOTE_USER']
     apikey = ''.join(random.sample(string.letters + string.digits,
             20))
@@ -157,13 +141,4 @@ def create():
             apikey=apikey,
             message='Your SEAS Cloud account is ready.',
             )
-
-
-def main():
-    opts = parse_args()
-    run(host=opts.host, port=int(opts.port), reloader=True)
-
-if __name__ == '__main__':
-    main()
-
 
