@@ -15,6 +15,8 @@ from keystoneclient.exceptions import *
 import markdown
 
 def filter_markdown(s):
+    '''Allows us to embed Markdown markup inside
+    {% filter markdown %} blocks.'''
     return markdown.markdown(s)
 
 def render(view, **kwargs):
@@ -31,11 +33,13 @@ def style_css():
 
 @route('/static/<path:path>')
 def static(path):
+    '''Server up static files from the `static/` directory.'''
     return static_file(path, 
             root=os.path.join(os.path.dirname(__file__), '..', 'static'))
 
 @route('/auth/debug')
 def debug():
+    '''Dump request.environ to a web page.'''
     return render('vars.html')
 
 @route('/')
@@ -82,6 +86,9 @@ def info(message=None):
 @route('/auth/newkey')
 @authenticated
 def newkey():
+    '''Generate a new apikey for the authenticated user if they have
+    an existing OpenStack account.'''
+
     uid = request.environ['REMOTE_USER']
     apikey = ''.join(random.sample(string.letters + string.digits,
             20))
@@ -101,6 +108,12 @@ def newkey():
 @route('/auth/create')
 @authenticated
 def create():
+    '''Create a new OpenStack user, including the following:
+
+    - Create a new tenant named "user/<username>".
+    - Create a new user account.
+    - Populate the "default" security group for the tenant.
+    '''
     uid = request.environ['REMOTE_USER']
     apikey = ''.join(random.sample(string.letters + string.digits,
             20))
