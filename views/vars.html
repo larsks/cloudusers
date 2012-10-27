@@ -2,7 +2,7 @@
 {% block title %}Debug dump{% endblock %}
 {% block content %}
 <table>
-{% for k,v in vars.items() %}
+{% for k,v in environ.items() %}
 <tr><td>{{k}}</td><td>{{v}}</td></tr>
 {% endfor %}
 </table>

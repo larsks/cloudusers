@@ -6,12 +6,17 @@ import argparse
 import string
 import random
 
-from bottle import route,post,run,request
+from bottle import route,post,run,request,static_file
 from bottle import jinja2_template as template
 
 import novaclient.v1_1.client as nova
 import keystoneclient.v2_0.client as keystone
 from keystoneclient.exceptions import *
+
+import markdown
+
+def filter_markdown(s):
+    return markdown.markdown(s)
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -19,22 +24,34 @@ def parse_args():
     p.add_argument('--port', '-p', default='8080')
     return p.parse_args()
 
+def render(view, **kwargs):
+    return template(view,
+            environ=request.environ,
+            template_settings={ 'filters':
+                { 'markdown': filter_markdown }},
+            **kwargs)
+
+@route('/static/<path:path>')
+def static(path):
+    return static_file(path, 
+            root=os.path.join(os.path.dirname(__file__), 'static'))
+
 @route('/debug')
 def debug():
-    return template('vars.html', vars=request.environ)
+    return render('vars.html')
 
 @route('/')
 def index(message=None):
-    return template('index.html', 
+    return render('index.html', 
             message=message,
-            environ=request.environ)
+            )
 
 @route('/auth/info')
 def info(message=None):
     if 'REMOTE_USER' not in request.environ:
-        return template('error.html',
+        return render('error.html',
                 message='Not authenticated.',
-                environ=request.environ)
+                )
 
     request.client = keystone.Client(
             endpoint=request.environ['SERVICE_ENDPOINT'],
@@ -45,20 +62,20 @@ def info(message=None):
     try:
         userrec = request.client.users.find(name=uid)
         tenantrec = request.client.tenants.get(userrec.tenantId)
-        return template('userinfo.html',
+        return render('userinfo.html',
                 user=userrec,
                 tenant=tenantrec,
-                environ=request.environ,
-                message=message)
+                message=message,
+                )
     except NotFound:
         return index(message='You do not have a SEAS cloud account.')
 
 @route('/auth/newkey')
 def newkey():
     if 'REMOTE_USER' not in request.environ:
-        return template('error.html',
+        return render('error.html',
                 message='Not authenticated.',
-                environ=request.environ)
+                )
 
     request.client = keystone.Client(
             endpoint=request.environ['SERVICE_ENDPOINT'],
@@ -74,19 +91,18 @@ def newkey():
         return index(message='You do not have a SEAS cloud account.')
 
     request.client.users.update_password(userrec.id, apikey)
-    return template('userinfo.html',
+    return render('userinfo.html',
             user=userrec,
             tenant=tenantrec,
             apikey=apikey,
-            environ=request.environ,
             )
 
 @route('/auth/create')
 def create():
     if 'REMOTE_USER' not in request.environ:
-        return template('error.html',
+        return render('error.html',
                 message='Not authenticated.',
-                environ=request.environ)
+                )
 
     request.client = keystone.Client(
             endpoint=request.environ['SERVICE_ENDPOINT'],
@@ -107,7 +123,7 @@ def create():
     # if the user already exists, just update their password.
     if userrec:
         return info(
-                message='You already have a SEAS Cloud account.',
+                message='Found an existing SEAS Cloud account for your username (%s).' % userrec.name,
                 )
 
     # If we get this far we need to create the user.  First
@@ -120,11 +136,26 @@ def create():
     userrec = request.client.users.create(uid,
             apikey, '', tenant_id=tenantrec.id)
 
-    return template('userinfo.html',
+    # And now we need to create some default
+    # security rules.
+    nc = nova.Client(userrec.name, apikey, tenantrec.name,
+            request.environ['SERVICE_ENDPOINT'],
+            service_type='compute')
+    sg = nc.security_groups.find(name='default')
+    sr = nc.security_group_rules.create(
+            sg.id, ip_protocol='icmp',
+            from_port='-1',
+            to_port='-1')
+    sr = nc.security_group_rules.create(
+            sg.id, ip_protocol='tcp',
+            from_port='22',
+            to_port='22')
+
+    return render('userinfo.html',
             user=userrec,
             tenant=tenantrec,
             apikey=apikey,
-            environ=request.environ,
+            message='Your SEAS Cloud account is ready.',
             )
 
 
