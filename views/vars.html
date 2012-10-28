@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Debug dump{% endblock %}
 {% block content %}
+<h2>Environ</h2>
 <table>
 {% for k,v in environ.items() %}
+<tr><td>{{k}}</td><td>{{v}}</td></tr>
+{% endfor %}
+</table>
+
+<h2>Config</h2>
+<table>
+{% for k,v in config.items() %}
 <tr><td>{{k}}</td><td>{{v}}</td></tr>
 {% endfor %}
 </table>

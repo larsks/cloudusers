@@ -5,11 +5,16 @@ import os
 import site
 
 appdir = os.path.dirname(__file__)
-if os.path.exists(os.path.join(appdir, 'env')):
-    site.addsitedir(os.path.join(appdir, 'env/lib/python2.6/site-packages'))
-sys.path.append(appdir)
+os.chdir(appdir)
+
+if os.path.exists('env'):
+    site.addsitedir('env/lib/python2.6/site-packages')
 
 import bottle
+
+if os.path.exists('cloudusers.yaml'):
+    cfdict = yaml.load(open('cloudusers.yaml', 'r'))
+    bottle.default_app().config.update(cfdict)
 
 os.chdir(appdir)
 import cloudusers.app

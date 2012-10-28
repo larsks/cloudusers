@@ -43,8 +43,9 @@ def static(path):
 
 @route('/auth/debug')
 def debug():
-    '''Dump request.environ to a web page.'''
-    return render('vars.html')
+    '''Dump various internal data to a web page.'''
+    return render('vars.html',
+            config = bottle.config)
 
 @route('/')
 def index(message=None):
