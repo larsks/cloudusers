@@ -10,8 +10,9 @@ from bottle import route,post,request,response,static_file
 from bottle import jinja2_template as template
 
 import novaclient.v1_1.client as nova
+import novaclient.exceptions
 import keystoneclient.v2_0.client as keystone
-from keystoneclient.exceptions import *
+import keystoneclient.exceptions
 
 import markdown
 
@@ -88,7 +89,7 @@ def info(message=None):
                 tenant=tenantrec,
                 message=message,
                 )
-    except NotFound:
+    except keystoneclient.exceptions.NotFound:
         return index(message='You do not have a SEAS cloud account.')
 
 @route('/auth/newkey')
@@ -103,7 +104,7 @@ def newkey():
     try:
         userrec = request.client.users.find(name=uid)
         tenantrec = request.client.tenants.get(userrec.tenantId)
-    except NotFound:
+    except keystoneclient.exceptions.NotFound:
         return index(message='You do not have a SEAS cloud account.')
 
     request.client.users.update_password(userrec.id, apikey)
@@ -129,10 +130,8 @@ def create():
     # Does the user exist?
     try:
         userrec = request.client.users.find(name=uid)
-    except NotFound:
+    except keystoneclient.exceptions.NotFound:
         userrec = None
-
-    print >>sys.stderr, 'userrec:', userrec
 
     # If the user already exists, just display account information.
     if userrec:
@@ -147,7 +146,7 @@ def create():
     # in place).
     try:
         tenantrec = request.client.tenants.find(name='user/%s' % uid)
-    except NotFound:
+    except keystoneclient.exceptions.NotFound:
         tenantrec = request.client.tenants.create('user/%s' % uid)
 
     userrec = request.client.users.create(uid,
@@ -166,11 +165,15 @@ def create():
 
         # Create security rules based on configuration.
         for rule in request.app.config['security rules']:
-            sr = nc.security_group_rules.create(
-                    sg.id,
-                    ip_protocol=rule['protocol'],
-                    from_port=rule['from port'],
-                    to_port=rule['to port'])
+            try:
+                sr = nc.security_group_rules.create(
+                        sg.id,
+                        ip_protocol=rule['protocol'],
+                        from_port=rule['from port'],
+                        to_port=rule['to port'])
+            except novaclient.exceptions.BadRequest:
+                # This probably means that the rule already exists.
+                pass
 
     return render('userinfo.html',
             user=userrec,
