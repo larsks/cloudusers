@@ -5,8 +5,10 @@ import sys
 import argparse
 import yaml
 
-import app
+import bottle
 from bottle import run, debug
+
+import app
 
 def parse_args():
     p = argparse.ArgumentParser()

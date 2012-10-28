@@ -5,6 +5,7 @@ import sys
 import string
 import random
 
+import bottle
 from bottle import route,post,request,response,static_file
 from bottle import jinja2_template as template
 
@@ -44,8 +45,9 @@ def static(path):
 @route('/auth/debug')
 def debug():
     '''Dump various internal data to a web page.'''
-    return render('vars.html',
-            config = bottle.config)
+    return render('debug.html',
+            config = request.app.config,
+            )
 
 @route('/')
 def index(message=None):
