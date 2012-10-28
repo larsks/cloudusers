@@ -155,19 +155,22 @@ def create():
 
     # And now we need to create some default
     # security rules.
-    # XXX: This should be cleaned up.
-    nc = nova.Client(userrec.name, apikey, tenantrec.name,
-            request.environ['SERVICE_ENDPOINT'],
-            service_type='compute')
-    sg = nc.security_groups.find(name='default')
-    sr = nc.security_group_rules.create(
-            sg.id, ip_protocol='icmp',
-            from_port='-1',
-            to_port='-1')
-    sr = nc.security_group_rules.create(
-            sg.id, ip_protocol='tcp',
-            from_port='22',
-            to_port='22')
+    if 'security rules' in request.app.config:
+        # Authenticate to nova as the new user.
+        nc = nova.Client(userrec.name, apikey, tenantrec.name,
+                request.environ['SERVICE_ENDPOINT'],
+                service_type='compute')
+
+        # Look up the "default" security group.
+        sg = nc.security_groups.find(name='default')
+
+        # Create security rules based on configuration.
+        for rule in request.app.config['security rules']:
+            sr = nc.security_group_rules.create(
+                    sg.id,
+                    ip_protocol=rule['protocol'],
+                    from_port=rule['from port'],
+                    to_port=rule['to port'])
 
     return render('userinfo.html',
             user=userrec,
