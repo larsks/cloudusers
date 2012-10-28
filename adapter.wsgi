@@ -5,6 +5,7 @@ import os
 import site
 
 appdir = os.path.dirname(__file__)
+sys.path.append(appdir)
 os.chdir(appdir)
 
 if os.path.exists('env'):
