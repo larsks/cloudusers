@@ -19,6 +19,7 @@ security rules:
     to port: 443
 # Set this to False to disable the /auth/debug screen.
 debug: True
+# Keystone endpoint and admin token.
 service_endpoint: http://127.0.0.1:35357/v2.0/
 service_token: SECRET
 
