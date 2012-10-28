@@ -67,10 +67,24 @@ def authenticated(fn):
     available in the environment and sets up a keystone client.'''
 
     def _(*args, **kwargs):
-        for var in ['SERVICE_ENDPOINT', 'SERVICE_TOKEN', 'REMOTE_USER']:
-            if var not in request.environ:
-                return render('error.html',
-                        error='Configuration error.')
+        service_endpoint = request.app.config.get('service_endpoint',
+                request.environ.get('SERVICE_ENDPOINT'))
+        service_token = request.app.config.get('service_token',
+                request.environ.get('SERVICE_TOKEN'))
+
+        if 'REMOTE_USER' not in request.environ:
+            return render('error.html',
+                    error='Configuration error (1).')
+
+        if not service_endpoint or not service_token:
+            return render('error.html',
+                    error='Configuration error (2).')
+
+        # If we got these from the environment, put them instead
+        # our config so that they're available elsewhere in the 
+        # code.
+        request.config.service_endpoint = service_endpoint
+        request.config.service_token = service_token
 
         request.client = keystone.Client(
                 endpoint=request.environ['SERVICE_ENDPOINT'],
@@ -162,7 +176,7 @@ def create():
     if 'security rules' in request.app.config:
         # Authenticate to nova as the new user.
         nc = nova.Client(userrec.name, apikey, tenantrec.name,
-                request.environ['SERVICE_ENDPOINT'],
+                request.config.service_endpoint,
                 service_type='compute')
 
         # Look up the "default" security group.
