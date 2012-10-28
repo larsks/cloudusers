@@ -1,13 +1,20 @@
 ---
+# This defines the security rules created for the "default" security
+# group when creating a new "user/<username>" tenant.
 security rules:
-  - protocol: tcp
-    from port: 22
-    to port: 22
-  - protocol: tcp
-    from port: 80
-    to port: 80
+  # all icmp traffic
   - protocol: icmp
     from port: -1
     to port: -1
+  # ssh
+  - protocol: tcp
+    from port: 22
+    to port: 22
+  # http and https
+  - protocol: tcp
+    from port: 80
+    to port: 80
+  - protocol: tcp
+    from port: 443
+    to port: 443
 
-    
