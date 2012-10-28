@@ -11,6 +11,7 @@ if os.path.exists('env'):
     site.addsitedir('env/lib/python2.6/site-packages')
 
 import bottle
+import yaml
 
 if os.path.exists('cloudusers.yaml'):
     cfdict = yaml.load(open('cloudusers.yaml', 'r'))
