@@ -87,8 +87,8 @@ def authenticated(fn):
         request.app.config.service_token = service_token
 
         request.client = keystone.Client(
-                endpoint=request.environ['SERVICE_ENDPOINT'],
-                token=request.environ['SERVICE_TOKEN'],
+                endpoint=service_endpoint,
+                token=service_token,
                 )
 
         return fn(*args, **kwargs)
