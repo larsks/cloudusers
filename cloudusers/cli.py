@@ -14,7 +14,7 @@ def parse_args():
     p.add_argument('--port', '-p', default='8080')
     p.add_argument('--reload', '-r', action='store_true')
     p.add_argument('--debug', '-d', action='store_true')
-    p.add_argument('--config', '-f', default='cloudusers.yaml')
+    p.add_argument('--config', '-f')
     return p.parse_args()
 
 def main():
