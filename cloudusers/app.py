@@ -46,9 +46,14 @@ def static(path):
 @route('/auth/debug')
 def debug():
     '''Dump various internal data to a web page.'''
-    return render('debug.html',
-            config = request.app.config,
-            )
+    if request.app.config.get('debug'):
+        return render('debug.html',
+                config = request.app.config,
+                )
+    else:
+        return render('error.html',
+                error='Debug mode is disabled.',
+                )
 
 @route('/')
 def index(message=None):

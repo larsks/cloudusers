@@ -17,4 +17,5 @@ security rules:
   - protocol: tcp
     from port: 443
     to port: 443
+debug: True
 
