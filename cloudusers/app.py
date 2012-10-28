@@ -83,8 +83,8 @@ def authenticated(fn):
         # If we got these from the environment, put them instead
         # our config so that they're available elsewhere in the 
         # code.
-        request.config.service_endpoint = service_endpoint
-        request.config.service_token = service_token
+        request.app.config.service_endpoint = service_endpoint
+        request.app.config.service_token = service_token
 
         request.client = keystone.Client(
                 endpoint=request.environ['SERVICE_ENDPOINT'],
@@ -176,7 +176,7 @@ def create():
     if 'security rules' in request.app.config:
         # Authenticate to nova as the new user.
         nc = nova.Client(userrec.name, apikey, tenantrec.name,
-                request.config.service_endpoint,
+                request.app.config.service_endpoint,
                 service_type='compute')
 
         # Look up the "default" security group.
