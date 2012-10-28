@@ -55,12 +55,13 @@ def index(message=None):
 def authenticated(fn):
     '''A function decorator for functions that require an authenticated
     user.  Ensures that `REMOTE_USER` (and other criticals variables) are
-    available in the environment and set up a keystone client.'''
+    available in the environment and sets up a keystone client.'''
 
     def _(*args, **kwargs):
         for var in ['SERVICE_ENDPOINT', 'SERVICE_TOKEN', 'REMOTE_USER']:
             if var not in request.environ:
-                return render(error.html, message='Configuration error.')
+                return render('error.html',
+                        error='Configuration error.')
 
         request.client = keystone.Client(
                 endpoint=request.environ['SERVICE_ENDPOINT'],

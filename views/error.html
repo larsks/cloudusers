@@ -2,6 +2,13 @@
 {% block title %}Error{% endblock %}
 
 {% block content %}
-    <p>An error has occurred: {{message}}</p>
+{% filter markdown %}
+**An unexpected error has occurred**: {{error}}
+
+If you encounter this message, please contact [Computing@SEAS][] via email
+to help@seas.harvard.edu.
+
+[computing@seas]: http://computing.seas.harvard.edu/
+{% endfilter %}
 {% endblock %}
 
