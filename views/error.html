@@ -3,14 +3,13 @@
 
 {% block content %}
 {% filter markdown %}
-## ERROR: {{error.title}}
+While trying to retrieve:
 
-While trying to retrieve: {{error.url}}
+    {{error.url}}
 
 This application encountered the following error:
 
 - **{{error.reason}}**
-
   {{error.description|trim}}
 
 If you encounter this message, please contact [Computing@SEAS][] via email
