@@ -10,7 +10,7 @@ class ApplicationError (Exception):
     details are available.'''
 
     def __str__ (self):
-        return self.description
+        return '%s: %s' % (self.reason, self.description)
 
 class ConfigurationError (ApplicationError):
     reason = 'Configuration error'
@@ -23,3 +23,4 @@ class DebugModeDisabledError (ApplicationError):
     description = '''You have requested a resource that is only available
     when this application is running in debug mode.  To enable debug mode,
     set `debug: True` in the application configuration file.'''
+

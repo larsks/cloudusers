@@ -14,7 +14,7 @@ import keystoneclient.exceptions
 
 import static
 from exceptions import *
-from decorators import *
+from decorators import render, authenticated
 
 @route('/style.css')
 @render('style.css')
