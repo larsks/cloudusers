@@ -3,6 +3,7 @@
 import os
 import sys
 from bottle import request
+from bottle import jinja2_template as template
 
 import keystoneclient.v2_0.client as keystone
 

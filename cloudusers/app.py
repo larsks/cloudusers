@@ -7,7 +7,6 @@ import random
 
 import bottle
 from bottle import route,post,request,response,static_file
-from bottle import jinja2_template as template
 
 import novaclient.v1_1.client as nova
 import novaclient.exceptions
