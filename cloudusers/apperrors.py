@@ -13,4 +13,4 @@ class ConfigurationError (ApplicationError):
     description = 'Configuration error'
 
 class DebugModeDisabledError (ApplicationError):
-    description = 'Debug mode is disabled')
+    description = 'Debug mode is disabled'
