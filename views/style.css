@@ -11,7 +11,6 @@ body {
 	padding-left: 120px;
 }
 
-
 .label {
 	font-weight: bold;
 }
@@ -26,5 +25,9 @@ table#userinfo {
 
 .right {
 	float: right;
+}
+
+.button {
+	padding-top: 1ex;
 }
 
