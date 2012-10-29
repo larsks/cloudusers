@@ -57,7 +57,7 @@ def info():
                 tenant=tenantrec,
                 )
     except keystoneclient.exceptions.NotFound:
-        redirect('%s/?message=You+do+not+have+a+SEAS+cloud+account.' % (
+        redirect('%s?message=You+do+not+have+a+SEAS+cloud+account.' % (
             request.script_name))
 
 @route('/auth/newkey')
@@ -74,7 +74,7 @@ def newkey():
         userrec = request.client.users.find(name=uid)
         tenantrec = request.client.tenants.get(userrec.tenantId)
     except keystoneclient.exceptions.NotFound:
-        redirect('%s/?message=You+do+not+have+a+SEAS+cloud+account.' % (
+        redirect('%s?message=You+do+not+have+a+SEAS+cloud+account.' % (
             request.script_name))
 
     request.client.users.update_password(userrec.id, apikey)
@@ -132,7 +132,7 @@ def create():
 
     # If the user already exists, just display account information.
     if userrec:
-        redirect('%s/auth/info' % request.script_name)
+        redirect('%sauth/info' % request.script_name)
 
     # If we get this far we need to create the user.  First
     # see if the appropriate tenant already exists (which might
