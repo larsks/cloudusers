@@ -1,5 +1,6 @@
 body {
-	max-width: 600px;
+	width: 600px !important;
+	min-width: 600px !important;
 	margin: auto;
 }
 
@@ -25,6 +26,13 @@ table#userinfo {
 
 .right {
 	float: right;
+}
+
+.block {
+	border: thin solid black;
+	padding: 2ex;
+	background: #c0c0c0;
+	width: 40%;
 }
 
 .button {
