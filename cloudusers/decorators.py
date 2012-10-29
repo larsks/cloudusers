@@ -25,8 +25,9 @@ class render (object):
                 namespace = fn(*args, **kwargs)
                 return self.render(self.view, **namespace)
             except ApplicationError, detail:
+                detail.url = request.url
                 return self.render('error.html',
-                        error=str(detail))
+                        error=detail)
 
         return _
 

@@ -4,13 +4,22 @@ import os
 import sys
 
 class ApplicationError (Exception):
-    description = 'Unknown error'
+    title = 'Unable to complete your request'
+    reason = 'Unknown error'
+    description = '''An unexpected error has occurred.  No further
+    details are available.'''
 
     def __str__ (self):
         return self.description
 
 class ConfigurationError (ApplicationError):
-    description = 'Configuration error'
+    reason = 'Configuration error'
+    description = '''This application is missing critical configuration
+    information.  If you are repsonsible for this application, please
+    consult the documentation.'''
 
 class DebugModeDisabledError (ApplicationError):
-    description = 'Debug mode is disabled'
+    reason = 'Debug mode is disabled'
+    description = '''You have requested a resource that is only available
+    when this application is running in debug mode.  To enable debug mode,
+    set `debug: True` in the application configuration file.'''

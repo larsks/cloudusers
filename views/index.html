@@ -19,7 +19,7 @@ password when prompted.
   <h2>Create my account</h2>
 
   <p class="button">
-  <a href="{{ environ.SCRIPT_NAME }}/auth/create"><button>Create my SEAS Cloud Account</button></a>
+  <a href="{{ request.script_name }}auth/create"><button>Create my SEAS Cloud Account</button></a>
   </p>
 </div>
 
@@ -27,7 +27,7 @@ password when prompted.
   <h2>Manage my account</h2>
 
   <p class="button">
-  <a href="{{ environ.SCRIPT_NAME }}/auth/info"><button>Manage my SEAS Cloud Account</button></a>
+  <a href="{{ request.script_name }}auth/info"><button>Manage my SEAS Cloud Account</button></a>
   </p>
 </div>
 {% endblock %}

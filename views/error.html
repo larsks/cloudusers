@@ -1,9 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Error{% endblock %}
+{% block title %}ERROR: {{error.title}}{% endblock %}
 
 {% block content %}
 {% filter markdown %}
-**An unexpected error has occurred**: {{error}}
+## ERROR: {{error.title}}
+
+While trying to retrieve: {{error.url}}
+
+This application encountered the following error:
+
+- **{{error.reason}}**
+
+  {{error.description|trim}}
 
 If you encounter this message, please contact [Computing@SEAS][] via email
 to <help@seas.harvard.edu>.
