@@ -32,6 +32,7 @@ class render (object):
 
     def render(self, view, **kwargs):
                 return template(view,
+                        request=request,
                         environ=request.environ,
                         template_settings={ 'filters':
                             { 'markdown': filter_markdown }},

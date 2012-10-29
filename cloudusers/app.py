@@ -38,7 +38,7 @@ def debug():
 @route('/')
 @render('index.html')
 def index():
-    message = request.forms.get('message')
+    message = request.query.get('message')
     return dict(
             message=message,
             )
@@ -55,11 +55,10 @@ def info():
         return dict(
                 user=userrec,
                 tenant=tenantrec,
-                message=message,
                 )
     except keystoneclient.exceptions.NotFound:
         redirect('%s/?message=You+do+not+have+a+SEAS+cloud+account.' % (
-            request.environ['SCRIPT_NAME']))
+            request.script_name))
 
 @route('/auth/newkey')
 @render('userinfo.html')
@@ -75,8 +74,8 @@ def newkey():
         userrec = request.client.users.find(name=uid)
         tenantrec = request.client.tenants.get(userrec.tenantId)
     except keystoneclient.exceptions.NotFound:
-        # XXX:
-        return index(message='You do not have a SEAS cloud account.')
+        redirect('%s/?message=You+do+not+have+a+SEAS+cloud+account.' % (
+            request.script_name))
 
     request.client.users.update_password(userrec.id, apikey)
     return dict(
@@ -133,7 +132,7 @@ def create():
 
     # If the user already exists, just display account information.
     if userrec:
-        redirect('%s/auth/info' % request.environ['SCRIPT_NAME'])
+        redirect('%s/auth/info' % request.script_name)
 
     # If we get this far we need to create the user.  First
     # see if the appropriate tenant already exists (which might
