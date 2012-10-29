@@ -2,9 +2,10 @@
 
 import os
 import sys
+
+import markdown
 from bottle import request
 from bottle import jinja2_template as template
-
 import keystoneclient.v2_0.client as keystone
 
 from apperrors import *
@@ -30,7 +31,7 @@ class render (object):
         return _
 
     def render(self, view, **kwargs):
-                return template(self.view,
+                return template(view,
                         environ=request.environ,
                         template_settings={ 'filters':
                             { 'markdown': filter_markdown }},
@@ -67,5 +68,5 @@ class authenticated(object):
                 token=service_token,
                 )
 
-        return fn(*args, **kwargs)
+        return self.fn(*args, **kwargs)
 

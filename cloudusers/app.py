@@ -12,8 +12,6 @@ import novaclient.v1_1.client as nova
 import novaclient.exceptions
 import keystoneclient.exceptions
 
-import markdown
-
 import static
 from exceptions import *
 from decorators import *
