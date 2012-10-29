@@ -6,7 +6,7 @@ import string
 import random
 
 import bottle
-from bottle import route,post,request,response,static_file
+from bottle import route,request,response,redirect
 
 import novaclient.v1_1.client as nova
 import novaclient.exceptions
@@ -37,7 +37,8 @@ def debug():
 
 @route('/')
 @render('index.html')
-def index(message=None):
+def index():
+    message = request.forms.get('message')
     return dict(
             message=message,
             )
@@ -45,7 +46,7 @@ def index(message=None):
 @route('/auth/info')
 @render('userinfo.html')
 @authenticated
-def info(message=None):
+def info():
     uid = request.environ['REMOTE_USER']
 
     try:
@@ -57,7 +58,8 @@ def info(message=None):
                 message=message,
                 )
     except keystoneclient.exceptions.NotFound:
-        return index(message='You do not have a SEAS cloud account.')
+        redirect('%s/?message=You+do+not+have+a+SEAS+cloud+account.' % (
+            request.environ['SCRIPT_NAME']))
 
 @route('/auth/newkey')
 @render('userinfo.html')
@@ -73,6 +75,7 @@ def newkey():
         userrec = request.client.users.find(name=uid)
         tenantrec = request.client.tenants.get(userrec.tenantId)
     except keystoneclient.exceptions.NotFound:
+        # XXX:
         return index(message='You do not have a SEAS cloud account.')
 
     request.client.users.update_password(userrec.id, apikey)
@@ -81,6 +84,32 @@ def newkey():
             tenant=tenantrec,
             apikey=apikey,
             )
+
+def create_security_rules(userrec, tenantrec, apikey):
+    '''Apply security rules from configuration to "default"
+    security group.'''
+
+    if 'security rules' in request.app.config:
+        # Authenticate to nova as the new user.
+        nc = nova.Client(userrec.name, apikey, tenantrec.name,
+                request.app.config.service_endpoint,
+                service_type='compute')
+
+        # Look up the "default" security group.
+        sg = nc.security_groups.find(name='default')
+
+        # Create security rules based on configuration.
+        for rule in request.app.config['security rules']:
+            try:
+                sr = nc.security_group_rules.create(
+                        sg.id,
+                        ip_protocol=rule['protocol'],
+                        from_port=rule['from port'],
+                        to_port=rule['to port'])
+            except novaclient.exceptions.BadRequest:
+                # This probably means that the rule already exists.
+                pass
+
 
 @route('/auth/create')
 @render('userinfo.html')
@@ -104,10 +133,7 @@ def create():
 
     # If the user already exists, just display account information.
     if userrec:
-        return info(
-                message='Found an existing SEAS Cloud account for ' \
-                        'your username (%s).' % userrec.name,
-                )
+        redirect('%s/auth/info' % request.environ['SCRIPT_NAME'])
 
     # If we get this far we need to create the user.  First
     # see if the appropriate tenant already exists (which might
@@ -121,28 +147,8 @@ def create():
     userrec = request.client.users.create(uid,
             apikey, '', tenant_id=tenantrec.id)
 
-    # And now we need to create some default
-    # security rules.
-    if 'security rules' in request.app.config:
-        # Authenticate to nova as the new user.
-        nc = nova.Client(userrec.name, apikey, tenantrec.name,
-                request.app.config.service_endpoint,
-                service_type='compute')
-
-        # Look up the "default" security group.
-        sg = nc.security_groups.find(name='default')
-
-        # Create security rules based on configuration.
-        for rule in request.app.config['security rules']:
-            try:
-                sr = nc.security_group_rules.create(
-                        sg.id,
-                        ip_protocol=rule['protocol'],
-                        from_port=rule['from port'],
-                        to_port=rule['to port'])
-            except novaclient.exceptions.BadRequest:
-                # This probably means that the rule already exists.
-                pass
+    # Add security rules to "default" security group.
+    create_security_rules(userrec, tenantrec, apikey)
 
     return dict(
             user=userrec,
