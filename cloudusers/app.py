@@ -11,91 +11,42 @@ from bottle import jinja2_template as template
 
 import novaclient.v1_1.client as nova
 import novaclient.exceptions
-import keystoneclient.v2_0.client as keystone
 import keystoneclient.exceptions
 
 import markdown
 
-def filter_markdown(s):
-    '''Allows us to embed Markdown markup inside
-    {% filter markdown %} blocks.'''
-    return markdown.markdown(s)
-
-def render(view, **kwargs):
-    '''This wraps template rendering so that we can provide
-    a standard set of variables into the templates.'''
-    return template(view,
-            environ=request.environ,
-            template_settings={ 'filters':
-                { 'markdown': filter_markdown }},
-            **kwargs)
+import static
+from exceptions import *
+from decorators import *
 
 @route('/style.css')
+@render('style.css')
 def style_css():
     '''Serves up our stylesheet.  This can't be a static file because we
     need to do template subsitution on URL paths.'''
     response.set_header('Content-type', 'text/css')
-    return render('style.css')
-
-@route('/static/<path:path>')
-def static(path):
-    '''Serve up static files from the `static/` directory.'''
-    return static_file(path, 
-            root=os.path.join(os.path.dirname(__file__), '..', 'static'))
+    return {}
 
 @route('/auth/debug')
+@render('debug.html')
 def debug():
     '''Dump various internal data to a web page.'''
-    if request.app.config.get('debug'):
-        return render('debug.html',
-                config = request.app.config,
-                )
-    else:
-        return render('error.html',
-                error='Debug mode is disabled.',
-                )
+    if not request.app.config.get('debug'):
+        raise DebugModeDisabledError()
+
+    return dict(
+            config = request.app.config,
+            )
 
 @route('/')
+@render('index.html')
 def index(message=None):
-    return render('index.html', 
+    return dict(
             message=message,
             )
 
-def authenticated(fn):
-    '''A function decorator for functions that require an authenticated
-    user.  Ensures that `REMOTE_USER` (and other criticals variables) are
-    available in the environment and sets up a keystone client.'''
-
-    def _(*args, **kwargs):
-        service_endpoint = request.app.config.get('service_endpoint',
-                request.environ.get('SERVICE_ENDPOINT'))
-        service_token = request.app.config.get('service_token',
-                request.environ.get('SERVICE_TOKEN'))
-
-        if 'REMOTE_USER' not in request.environ:
-            return render('error.html',
-                    error='Configuration error (1).')
-
-        if not service_endpoint or not service_token:
-            return render('error.html',
-                    error='Configuration error (2).')
-
-        # If we got these from the environment, put them instead
-        # our config so that they're available elsewhere in the 
-        # code.
-        request.app.config.service_endpoint = service_endpoint
-        request.app.config.service_token = service_token
-
-        request.client = keystone.Client(
-                endpoint=service_endpoint,
-                token=service_token,
-                )
-
-        return fn(*args, **kwargs)
-
-    return _
-
 @route('/auth/info')
+@render('userinfo.html')
 @authenticated
 def info(message=None):
     uid = request.environ['REMOTE_USER']
@@ -103,7 +54,7 @@ def info(message=None):
     try:
         userrec = request.client.users.find(name=uid)
         tenantrec = request.client.tenants.get(userrec.tenantId)
-        return render('userinfo.html',
+        return dict(
                 user=userrec,
                 tenant=tenantrec,
                 message=message,
@@ -112,6 +63,7 @@ def info(message=None):
         return index(message='You do not have a SEAS cloud account.')
 
 @route('/auth/newkey')
+@render('userinfo.html')
 @authenticated
 def newkey():
     '''Generate a new apikey for the authenticated user if they have
@@ -127,13 +79,14 @@ def newkey():
         return index(message='You do not have a SEAS cloud account.')
 
     request.client.users.update_password(userrec.id, apikey)
-    return render('userinfo.html',
+    return dict(
             user=userrec,
             tenant=tenantrec,
             apikey=apikey,
             )
 
 @route('/auth/create')
+@render('userinfo.html')
 @authenticated
 def create():
     '''Create a new OpenStack user, including the following:
@@ -194,7 +147,7 @@ def create():
                 # This probably means that the rule already exists.
                 pass
 
-    return render('userinfo.html',
+    return dict(
             user=userrec,
             tenant=tenantrec,
             apikey=apikey,
