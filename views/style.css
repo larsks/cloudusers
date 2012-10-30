@@ -12,6 +12,14 @@ body {
 	padding-left: 120px;
 }
 
+#message {
+	border: thin solid black;
+	background: yellow;
+	margin-top: 1ex;
+	margin-bottom: 1ex;
+	padding: 1ex;
+}
+
 .label {
 	font-weight: bold;
 }
