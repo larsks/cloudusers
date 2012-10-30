@@ -16,6 +16,29 @@ The general idea
 - Users can use the *cloudusers* interface to re-generate their
   OpenStack password at any time.
 
+Requirements
+============
+
+- python-novaclient
+- python-keystoneclient
+- [Bottle][] >= 0.11.0
+
+*Cloudusers* has explicit support for running using a Python virtual
+environment.  If you create a virtual environment called `env` inside
+the application folder, *cloudusers* will add the appropriate
+`site-packages` directory to `sys.path`.  You can set it up like this:
+
+    # cd cloudusers
+    # virtualenv --system-site-packages env
+    # ./env/bin/easy_install -U bottle
+
+This will create a virtual environment that knows about third-party
+modules installed in your system Python library but that has the most
+recent version of [Bottle][], regardless of what is installed on your
+system.
+
+[bottle]: http://bottlepy.org/
+
 Configuration
 =============
 
