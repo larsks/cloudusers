@@ -13,7 +13,7 @@ import novaclient.exceptions
 import keystoneclient.exceptions
 
 import static
-from exceptions import *
+from apperrors import *
 from decorators import render, authenticated
 
 @route('/style.css')
@@ -23,6 +23,17 @@ def style_css():
     need to do template subsitution on URL paths.'''
     response.set_header('Content-type', 'text/css')
     return {}
+
+@route('/error/:code')
+@render('error.html')
+def error(code):
+    '''This meant to be used with Apache `ErrorDocument` directives.'''
+    if code == '401':
+        raise AuthenticationRequiredError()
+    elif code == '403':
+        raise AuthenticationFailedError()
+    else:
+        raise ApplicationError()
 
 @route('/auth/debug')
 @render('debug.html')

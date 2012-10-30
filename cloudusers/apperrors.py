@@ -24,3 +24,13 @@ class DebugModeDisabledError (ApplicationError):
     when this application is running in debug mode.  To enable debug mode,
     set `debug: True` in the application configuration file.'''
 
+class AuthenticationRequiredError (ApplicationError):
+    reason = 'Authentication required'
+    description = '''You must provide a valid username and password
+    in order to use this application.'''
+
+class AuthenticationFailedError (ApplicationError):
+    reason = 'Authentication failed'
+    description = '''The web server rejected your username and 
+    password.'''
+

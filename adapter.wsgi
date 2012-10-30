@@ -9,7 +9,8 @@ sys.path.append(appdir)
 os.chdir(appdir)
 
 if os.path.exists('env'):
-    site.addsitedir('env/lib/python2.6/site-packages')
+    site.addsitedir('env/lib/python%d.%d/site-packages' % (
+        sys.version_info.major, sys.version_info.minor))
 
 import bottle
 import yaml
