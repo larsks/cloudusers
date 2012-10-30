@@ -10,7 +10,7 @@ os.chdir(appdir)
 
 if os.path.exists('env'):
     site.addsitedir('env/lib/python%d.%d/site-packages' % (
-        sys.version_info.major, sys.version_info.minor))
+        sys.version_info[0], sys.version_info[1]))
 
 import bottle
 import yaml
