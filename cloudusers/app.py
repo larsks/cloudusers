@@ -75,11 +75,11 @@ def info():
 @render('userinfo.html')
 @authenticated
 def newkey():
-    '''Generate a new apikey for the authenticated user if they have
+    '''Generate a new password for the authenticated user if they have
     an existing OpenStack account.'''
 
     uid = request.environ['REMOTE_USER']
-    apikey = ''.join(random.sample(string.letters + string.digits,
+    passwd = ''.join(random.sample(string.letters + string.digits,
             20))
     try:
         userrec = request.client.users.find(name=uid)
@@ -88,20 +88,20 @@ def newkey():
         redirect('%s?message=You+do+not+have+a+SEAS+cloud+account.' % (
             request.script_name))
 
-    request.client.users.update_password(userrec.id, apikey)
+    request.client.users.update_password(userrec.id, passwd)
     return dict(
             user=userrec,
             tenant=tenantrec,
-            apikey=apikey,
+            passwd=passwd,
             )
 
-def create_security_rules(userrec, tenantrec, apikey):
+def create_security_rules(userrec, tenantrec, passwd):
     '''Apply security rules from configuration to "default"
     security group.'''
 
     if 'security rules' in request.app.config:
         # Authenticate to nova as the new user.
-        nc = nova.Client(userrec.name, apikey, tenantrec.name,
+        nc = nova.Client(userrec.name, passwd, tenantrec.name,
                 request.app.config.service_endpoint,
                 service_type='compute')
 
@@ -132,7 +132,7 @@ def create():
     - Populate the "default" security group for the tenant.
     '''
     uid = request.environ['REMOTE_USER']
-    apikey = ''.join(random.sample(string.letters + string.digits,
+    passwd = ''.join(random.sample(string.letters + string.digits,
             20))
 
     # Does the user exist?
@@ -155,15 +155,15 @@ def create():
         tenantrec = request.client.tenants.create('user/%s' % uid)
 
     userrec = request.client.users.create(uid,
-            apikey, '', tenant_id=tenantrec.id)
+            passwd, '', tenant_id=tenantrec.id)
 
     # Add security rules to "default" security group.
-    create_security_rules(userrec, tenantrec, apikey)
+    create_security_rules(userrec, tenantrec, passwd)
 
     return dict(
             user=userrec,
             tenant=tenantrec,
-            apikey=apikey,
+            passwd=passwd,
             message='Your SEAS Cloud account is ready.',
             )
 
