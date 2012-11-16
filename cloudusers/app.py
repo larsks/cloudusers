@@ -95,13 +95,13 @@ def newkey():
             passwd=passwd,
             )
 
-def create_security_rules(group, rules):
+def create_security_group_rules(group, rules):
     '''Apply security rules from 'rules' to 'group'
     security group.'''
 
     for rule in rules:
         try:
-            sr = nc.security_group_rules.create(
+            sr = request.nc.security_group_rules.create(
                     group.id,
                     ip_protocol=rule['protocol'],
                     from_port=rule['from port'],
@@ -111,7 +111,7 @@ def create_security_rules(group, rules):
             pass
 
 def create_security_groups():
-    for name in request.config.get('security groups', []):
+    for name in request.app.config.get('security groups', []):
         try:
             group = request.nc.security_groups.find(name=name)
         except novaclient.exceptions.NotFound:
@@ -120,7 +120,7 @@ def create_security_groups():
 
         create_security_group_rules(
                 group,
-                request.config['security groups'][name])
+                request.app.config['security groups'][name])
 
 @route('/auth/create')
 @render('userinfo.html')
