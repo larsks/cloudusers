@@ -95,31 +95,32 @@ def newkey():
             passwd=passwd,
             )
 
-def create_security_rules(userrec, tenantrec, passwd):
-    '''Apply security rules from configuration to "default"
+def create_security_rules(group, rules):
+    '''Apply security rules from 'rules' to 'group'
     security group.'''
 
-    if 'security rules' in request.app.config:
-        # Authenticate to nova as the new user.
-        nc = nova.Client(userrec.name, passwd, tenantrec.name,
-                request.app.config.service_endpoint,
-                service_type='compute')
+    for rule in rules:
+        try:
+            sr = nc.security_group_rules.create(
+                    group.id,
+                    ip_protocol=rule['protocol'],
+                    from_port=rule['from port'],
+                    to_port=rule['to port'])
+        except novaclient.exceptions.BadRequest:
+            # This probably means that the rule already exists.
+            pass
 
-        # Look up the "default" security group.
-        sg = nc.security_groups.find(name='default')
+def create_security_groups():
+    for name in request.config.get('security groups', []):
+        try:
+            group = request.nc.security_groups.find(name=name)
+        except novaclient.exceptions.NotFound:
+            group = request.nc.security_groups.create(
+                    name, '%s security group' % name)
 
-        # Create security rules based on configuration.
-        for rule in request.app.config['security rules']:
-            try:
-                sr = nc.security_group_rules.create(
-                        sg.id,
-                        ip_protocol=rule['protocol'],
-                        from_port=rule['from port'],
-                        to_port=rule['to port'])
-            except novaclient.exceptions.BadRequest:
-                # This probably means that the rule already exists.
-                pass
-
+        create_security_group_rules(
+                group,
+                request.config['security groups'][name])
 
 @route('/auth/create')
 @render('userinfo.html')
@@ -157,8 +158,12 @@ def create():
     userrec = request.client.users.create(uid,
             passwd, '', tenant_id=tenantrec.id)
 
-    # Add security rules to "default" security group.
-    create_security_rules(userrec, tenantrec, passwd)
+    # Create security groups.
+    request.nc = nova.Client(userrec.name, passwd, tenantrec.name,
+            request.app.config.service_endpoint,
+            service_type='compute')
+
+    create_security_groups()
 
     return dict(
             user=userrec,

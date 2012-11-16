@@ -1,22 +1,28 @@
 ---
 # This defines the security rules created for the "default" security
 # group when creating a new "user/<username>" tenant.
-security rules:
-  # all icmp traffic
-  - protocol: icmp
-    from port: -1
-    to port: -1
-  # ssh
-  - protocol: tcp
-    from port: 22
-    to port: 22
-  # http and https
-  - protocol: tcp
-    from port: 80
-    to port: 80
-  - protocol: tcp
-    from port: 443
-    to port: 443
+security groups:
+  default:
+    # all icmp traffic
+    - protocol: icmp
+      from port: -1
+      to port: -1
+    # ssh
+    - protocol: tcp
+      from port: 22
+      to port: 22
+  web:
+    # http and https
+    - protocol: tcp
+      from port: 80
+      to port: 80
+    - protocol: tcp
+      from port: 443
+      to port: 443
+  remote_desktop:
+    - protocol: tcp
+      from port: 3389
+      to port: 3389
 
 # Set this to False to disable the /auth/debug screen.
 debug: True
